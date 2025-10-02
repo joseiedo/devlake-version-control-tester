@@ -42,9 +42,6 @@ pipeline {
         }
 
         stage('Deploy to Staging') {
-            when {
-                expression { return env.BRANCH_NAME == 'main' || env.BRANCH_NAME == 'master' }
-            }
             steps {
                 echo "Initiating deployment to ${DEPLOY_TARGET}..."
                 // Simulation of a critical deploy error (e.g., connection refusal or bad permissions)
