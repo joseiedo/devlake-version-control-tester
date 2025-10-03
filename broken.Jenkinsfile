@@ -65,7 +65,7 @@ pipeline {
     post {
         success {
             script {
-                sh """curl http://devlake-config-ui-1:4000/api/rest/plugins/webhook/connections/2/deployments -X 'POST' -H 'Authorization: Bearer ' -d '{
+                sh """curl http://devlake-config-ui-1:4000/api/rest/plugins/webhook/connections/2/deployments -X 'POST' -H 'Authorization: Bearer eLgjJAH5wN0zlboo26oIfh9zLh3sAQiv5iBTRx2terkvg9U8JFfuuTFDu0m8sK3FVWvBw0yHTqIJofUpWLfVRIQKD2XrBhkHAhGyKseHcCi9lDooDJkQ2k4I9VwLZyU2' -d '{
                   \"id\": \"my-deployment-123\",
                   \"startedDate\": \"2023-01-01T12:00:00+00:00\",
                   \"finishedDate\": \"2023-01-01T12:00:00+00:00\",
@@ -85,7 +85,7 @@ pipeline {
         }
         failure {
             script {
-                sh """curl http://devlake-config-ui-1:4000/api/rest/plugins/webhook/connections/2/deployments -X 'POST' -H 'Authorization: Bearer ' -d '{
+                sh """curl http://devlake-config-ui-1:4000/api/rest/plugins/webhook/connections/2/deployments -X 'POST' -H 'Authorization: Bearer eLgjJAH5wN0zlboo26oIfh9zLh3sAQiv5iBTRx2terkvg9U8JFfuuTFDu0m8sK3FVWvBw0yHTqIJofUpWLfVRIQKD2XrBhkHAhGyKseHcCi9lDooDJkQ2k4I9VwLZyU2' -d '{
                   \"id\": \"my-deployment-123\",
                   \"startedDate\": \"2023-01-01T12:00:00+00:00\",
                   \"finishedDate\": \"2023-01-01T12:00:00+00:00\",
