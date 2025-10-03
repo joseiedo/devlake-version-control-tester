@@ -1,9 +1,6 @@
 pipeline {
     agent any
 
-    // 1. Define the variable at the pipeline level so it's accessible in post blocks.
-    def COMMIT_MESSAGE = 'N/A'
-
     parameters {
         booleanParam(name: 'SHOULD_PASS', defaultValue: true, description: 'Defines if the pipeline should pass successfully or not')
     }
@@ -15,7 +12,6 @@ pipeline {
     }
 
     stages {
-        // Removed 'def message' here, as the variable is now defined at the pipeline root.
 
         stage('Checkout Source Code') {
             steps {
@@ -31,8 +27,7 @@ pipeline {
                     def branchName = env.GIT_BRANCH ?: 'N/A'
                     def author = env.GIT_AUTHOR_NAME ?: 'Unknown Author'
                     
-                    // 2. Assign the retrieved message to the pipeline-scoped variable (NO 'def' here)
-                    COMMIT_MESSAGE = sh(returnStdout: true, script: 'git log -1 --pretty=%B').trim()
+                    def COMMIT_MESSAGE = sh(returnStdout: true, script: 'git log -1 --pretty=%B').trim()
 
                     echo "--- Commit Details for Deployment ---"
                     echo "Application: ${APP_NAME}"
@@ -70,10 +65,6 @@ pipeline {
     post {
         success {
             script {
-                // 3. Escape the commit message for safe JSON embedding (handles quotes and newlines)
-                def escapedMessage = COMMIT_MESSAGE.replaceAll(/"/, /\\"/).replaceAll(/\n/, /\\n/)
-
-                // Using triple quotes (""") for the shell command makes interpolation easier
                 sh """curl http://localhost:4000/api/rest/plugins/webhook/connections/2/deployments -X 'POST' -H 'Authorization: Bearer ' -d '{
                   \"id\": \"my-deployment-123\",
                   \"startedDate\": \"2023-01-01T12:00:00+00:00\",
@@ -86,7 +77,7 @@ pipeline {
                       \"startedDate\": \"2023-01-01T12:00:00+00:00\",
                       \"finishedDate\": \"2023-01-01T12:00:00+00:00\",
                       \"commitSha\": \"${env.GIT_COMMIT}\",
-                      \"commitMsg\": \"${escapedMessage}\"
+                      \"commitMsg\": \"deployment made :)\"
                     }
                   ]
                 }'"""
@@ -94,9 +85,6 @@ pipeline {
         }
         failure {
             script {
-                // 3. Escape the commit message for safe JSON embedding (handles quotes and newlines)
-                def escapedMessage = COMMIT_MESSAGE.replaceAll(/"/, /\\"/).replaceAll(/\n/, /\\n/)
-
                 sh """curl http://localhost:4000/api/rest/plugins/webhook/connections/2/deployments -X 'POST' -H 'Authorization: Bearer ' -d '{
                   \"id\": \"my-deployment-123\",
                   \"startedDate\": \"2023-01-01T12:00:00+00:00\",
@@ -109,7 +97,7 @@ pipeline {
                       \"startedDate\": \"2023-01-01T12:00:00+00:00\",
                       \"finishedDate\": \"2023-01-01T12:00:00+00:00\",
                       \"commitSha\": \"${env.GIT_COMMIT}\",
-                      \"commitMsg\": \"${escapedMessage}\"
+                      \"commitMsg\": \"deployment made :)\"
                     }
                   ]
                 }'"""
