@@ -65,7 +65,7 @@ pipeline {
     post {
         success {
             script {
-                sh """curl http://localhost:4000/api/rest/plugins/webhook/connections/2/deployments -X 'POST' -H 'Authorization: Bearer ' -d '{
+                sh """curl http://devlake:4000/api/rest/plugins/webhook/connections/2/deployments -X 'POST' -H 'Authorization: Bearer ' -d '{
                   \"id\": \"my-deployment-123\",
                   \"startedDate\": \"2023-01-01T12:00:00+00:00\",
                   \"finishedDate\": \"2023-01-01T12:00:00+00:00\",
@@ -85,7 +85,7 @@ pipeline {
         }
         failure {
             script {
-                sh """curl http://localhost:4000/api/rest/plugins/webhook/connections/2/deployments -X 'POST' -H 'Authorization: Bearer ' -d '{
+                sh """curl http://devlake:4000/api/rest/plugins/webhook/connections/2/deployments -X 'POST' -H 'Authorization: Bearer ' -d '{
                   \"id\": \"my-deployment-123\",
                   \"startedDate\": \"2023-01-01T12:00:00+00:00\",
                   \"finishedDate\": \"2023-01-01T12:00:00+00:00\",
