@@ -1,12 +1,18 @@
 pipeline {
     agent any
 
+    parameters {
+        booleanParam(name: 'SHOULD_PASS', defaultValue: true, description: 'Defines if the pipeline should pass successfully or not')
+    }
+
     environment {
         DEPLOY_TARGET = 'staging-server-01'
         APP_NAME = 'FakeWebApp'
+	REPOSITORY = 'https://github.com/joseiedo/devlake-version-control-tester'
     }
 
     stages {
+	def message
         stage('Checkout Source Code') {
             steps {
                 echo "Starting pipeline for ${APP_NAME}."
@@ -43,15 +49,52 @@ pipeline {
 
         stage('Deploy to Staging') {
             steps {
-                echo "Initiating deployment to ${DEPLOY_TARGET}..."
-                // Simulation of a critical deploy error (e.g., connection refusal or bad permissions)
-                sh 'echo "Deployment Error: Connection refused by target server ${DEPLOY_TARGET}. Aborting deployment." && exit 1'
-                echo "Deployment complete! Version: ${env.GIT_COMMIT.take(8)} is live."
+  		script {
+			if (params.FAIL_STEP) {
+				error('failed on purpose.')
+			}
+		}
             }
         }
     }
 
     post {
+    	success {
+		sh "curl http://localhost:4000/api/rest/plugins/webhook/connections/2/deployments -X 'POST' -H 'Authorization: Bearer ' -d '{
+		  \"id\": \"my-deployment-123\",
+		  \"startedDate\": \"2023-01-01T12:00:00+00:00\",
+		  \"finishedDate\": \"2023-01-01T12:00:00+00:00\",
+		  \"result\": \"SUCCESS\",
+		  \"deploymentCommits\": [
+		    {
+		      \"repoUrl\": \"${REPOSITORY}\",
+		      \"refName\": \"${env.GIT_BRANCH}\",
+		      \"startedDate\": \"2023-01-01T12:00:00+00:00\",
+		      \"finishedDate\": \"2023-01-01T12:00:00+00:00\",
+		      \"commitSha\": \"${env.GIT_COMMIT}\",
+		      \"commitMsg\": \"${message}\"
+		    }
+		  ]
+		}'"
+	}
+    	failure {
+		sh "curl http://localhost:4000/api/rest/plugins/webhook/connections/2/deployments -X 'POST' -H 'Authorization: Bearer ' -d '{
+		  \"id\": \"my-deployment-123\",
+		  \"startedDate\": \"2023-01-01T12:00:00+00:00\",
+		  \"finishedDate\": \"2023-01-01T12:00:00+00:00\",
+		  \"result\": \"FAILURE\",
+		  \"deploymentCommits\": [
+		    {
+		      \"repoUrl\": \"${REPOSITORY}\",
+		      \"refName\": \"${env.GIT_BRANCH}\",
+		      \"startedDate\": \"2023-01-01T12:00:00+00:00\",
+		      \"finishedDate\": \"2023-01-01T12:00:00+00:00\",
+		      \"commitSha\": \"${env.GIT_COMMIT}\",
+		      \"commitMsg\": \"${message}\"
+		    }
+		  ]
+		}'"
+	}
         always {
             cleanWs()
             echo "Workspace cleaned up."
