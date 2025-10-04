@@ -68,7 +68,7 @@ pipeline {
                 def deployEndTime = new Date().format("yyyy-MM-dd'T'HH:mm:ssZ", java.util.TimeZone.getTimeZone('UTC'))
 
                 sh """curl http://devlake-config-ui-1:4000/api/rest/plugins/webhook/connections/2/deployments -X 'POST' -H 'Authorization: Bearer eLgjJAH5wN0zlboo26oIfh9zLh3sAQiv5iBTRx2terkvg9U8JFfuuTFDu0m8sK3FVWvBw0yHTqIJofUpWLfVRIQKD2XrBhkHAhGyKseHcCi9lDooDJkQ2k4I9VwLZyU2' -d '{
-                    \"id\": \"jenkins:JenkinsBuild:2:deploy#${env.BUILD_NUMBER}\",
+                    \"id\": \"jenkins:Webhook:2:deploy#${env.BUILD_NUMBER}\",
                     \"startedDate\": \"${now}\",
                     \"finishedDate\": \"${deployEndTime}\",
                     \"result\": \"SUCCESS\",
@@ -91,7 +91,7 @@ pipeline {
                 def deployEndTime = new Date().format("yyyy-MM-dd'T'HH:mm:ssZ", java.util.TimeZone.getTimeZone('UTC'))
 
                 sh """curl http://devlake-config-ui-1:4000/api/rest/plugins/webhook/connections/2/deployments -X 'POST' -H 'Authorization: Bearer eLgjJAH5wN0zlboo26oIfh9zLh3sAQiv5iBTRx2terkvg9U8JFfuuTFDu0m8sK3FVWvBw0yHTqIJofUpWLfVRIQKD2XrBhkHAhGyKseHcCi9lDooDJkQ2k4I9VwLZyU2' -d '{
-                    \"id\": \"jenkins:JenkinsBuild:2:deploy#${env.BUILD_NUMBER}\",
+                    \"id\": \"jenkins:Webhook:2:deploy#${env.BUILD_NUMBER}\",
                     \"startedDate\": \"${now}\",
                     \"finishedDate\": \"${deployEndTime}\",
                     \"result\": \"FAILURE\",
