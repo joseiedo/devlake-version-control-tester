@@ -56,8 +56,9 @@ pipeline {
             steps {
                 script {
                     // --- 1. Capture the START time immediately before deployment begins ---
-                    // Format: yyyy-MM-dd'T'HH:mm:ssXXX (e.g., 2023-01-01T12:00:00+00:00)
-                    def now = java.time.ZonedDateTime.now(java.time.ZoneOffset.UTC).format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX"))
+                    // FIX: Using Date().format with TimeZone.getTimeZone('UTC') for Groovy Sandbox compatibility
+                    // Format: yyyy-MM-dd'T'HH:mm:ssZ (e.g., 2023-01-01T12:00:00+0000). DevLake accepts this.
+                    def now = new Date().format("yyyy-MM-dd'T'HH:mm:ssZ", java.util.TimeZone.getTimeZone('UTC'))
                     
                     // Assign to global variables for use in the post block
                     env.DEPLOY_START_TIME = now
@@ -78,7 +79,8 @@ pipeline {
         success {
             script {
                 // --- 2. Capture the END time when the pipeline finishes successfully ---
-                def deployEndTime = java.time.ZonedDateTime.now(java.time.ZoneOffset.UTC).format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX"))
+                // FIX: Using Date().format with TimeZone.getTimeZone('UTC') for Groovy Sandbox compatibility
+                def deployEndTime = new Date().format("yyyy-MM-dd'T'HH:mm:ssZ", java.util.TimeZone.getTimeZone('UTC'))
 
                 sh """curl http://devlake-config-ui-1:4000/api/rest/plugins/webhook/connections/2/deployments -X 'POST' -H 'Authorization: Bearer eLgjJAH5wN0zlboo26oIfh9zLh3sAQiv5iBTRx2terkvg9U8JFfuuTFDu0m8sK3FVWvBw0yHTqIJofUpWLfVRIQKD2XrBhkHAhGyKseHcCi9lDooDJkQ2k4I9VwLZyU2' -d '{
                     \"id\": \"jenkins:JenkinsBuild:2:deploy#${env.BUILD_NUMBER}\",
@@ -102,7 +104,8 @@ pipeline {
         failure {
             script {
                 // --- 2. Capture the END time when the pipeline finishes in failure ---
-                def deployEndTime = java.time.ZonedDateTime.now(java.time.ZoneOffset.UTC).format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX"))
+                // FIX: Using Date().format with TimeZone.getTimeZone('UTC') for Groovy Sandbox compatibility
+                def deployEndTime = new Date().format("yyyy-MM-dd'T'HH:mm:ssZ", java.util.TimeZone.getTimeZone('UTC'))
 
                 sh """curl http://devlake-config-ui-1:4000/api/rest/plugins/webhook/connections/2/deployments -X 'POST' -H 'Authorization: Bearer eLgjJAH5wN0zlboo26oIfh9zLh3sAQiv5iBTRx2terkvg9U8JFfuuTFDu0m8sK3FVWvBw0yHTqIJofUpWLfVRIQKD2XrBhkHAhGyKseHcCi9lDooDJkQ2k4I9VwLZyU2' -d '{
                     \"id\": \"jenkins:JenkinsBuild:2:deploy#${env.BUILD_NUMBER}\",
