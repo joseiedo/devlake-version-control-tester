@@ -9,10 +9,6 @@ pipeline {
         DEPLOY_TARGET = 'staging-server-01'
         APP_NAME = 'FakeWebApp'
         REPOSITORY = 'https://github.com/joseiedo/devlake-version-control-tester'
-        
-        // Dynamic variables initialized here, values set in stages
-        DEPLOY_START_TIME = ''
-        COMMIT_START_TIME = ''
     }
 
     stages {
@@ -55,16 +51,6 @@ pipeline {
         stage('Deploy to Staging') {
             steps {
                 script {
-                    // --- 1. Capture the START time immediately before deployment begins ---
-                    // FIX: Using Date().format with TimeZone.getTimeZone('UTC') for Groovy Sandbox compatibility
-                    // Format: yyyy-MM-dd'T'HH:mm:ssZ (e.g., 2023-01-01T12:00:00+0000). DevLake accepts this.
-                    def now = new Date().format("yyyy-MM-dd'T'HH:mm:ssZ", java.util.TimeZone.getTimeZone('UTC'))
-                    
-                    // Assign to global variables for use in the post block
-                    env.DEPLOY_START_TIME = now
-                    env.COMMIT_START_TIME = now // Assuming commit process starts now too
-
-                    // Using a parameter check based on your provided structure
                     if (!params.SHOULD_PASS) {
                         error('Failed on purpose as requested by parameter.')
                     } else {
@@ -78,24 +64,22 @@ pipeline {
     post {
         success {
             script {
-                // --- 2. Capture the END time when the pipeline finishes successfully ---
-                // FIX: Using Date().format with TimeZone.getTimeZone('UTC') for Groovy Sandbox compatibility
+                def now = new Date().format("yyyy-MM-dd'T'HH:mm:ssZ", java.util.TimeZone.getTimeZone('UTC'))
                 def deployEndTime = new Date().format("yyyy-MM-dd'T'HH:mm:ssZ", java.util.TimeZone.getTimeZone('UTC'))
 
                 sh """curl http://devlake-config-ui-1:4000/api/rest/plugins/webhook/connections/2/deployments -X 'POST' -H 'Authorization: Bearer eLgjJAH5wN0zlboo26oIfh9zLh3sAQiv5iBTRx2terkvg9U8JFfuuTFDu0m8sK3FVWvBw0yHTqIJofUpWLfVRIQKD2XrBhkHAhGyKseHcCi9lDooDJkQ2k4I9VwLZyU2' -d '{
                     \"id\": \"jenkins:JenkinsBuild:2:deploy#${env.BUILD_NUMBER}\",
-                    \"startedDate\": \"${env.DEPLOY_START_TIME}\",
+                    \"startedDate\": \"${now}\",
                     \"finishedDate\": \"${deployEndTime}\",
                     \"result\": \"SUCCESS\",
                     \"deploymentCommits\": [
                         {
                             \"repoUrl\": \"${REPOSITORY}\",
                             \"refName\": \"${env.GIT_BRANCH}\",
-                            // Use the dynamic deployment times for the commit as well
-                            \"startedDate\": \"${env.COMMIT_START_TIME}\",
+                            \"startedDate\": \"${now}\",
                             \"finishedDate\": \"${deployEndTime}\",
                             \"commitSha\": \"${env.GIT_COMMIT}\",
-                            \"commitMsg\": \"deployment made :)\"
+                            \"commitMsg\": \"deployment sucess\"
                         }
                     ]
                 }'"""
@@ -103,24 +87,22 @@ pipeline {
         }
         failure {
             script {
-                // --- 2. Capture the END time when the pipeline finishes in failure ---
-                // FIX: Using Date().format with TimeZone.getTimeZone('UTC') for Groovy Sandbox compatibility
+                def now = new Date().format("yyyy-MM-dd'T'HH:mm:ssZ", java.util.TimeZone.getTimeZone('UTC'))
                 def deployEndTime = new Date().format("yyyy-MM-dd'T'HH:mm:ssZ", java.util.TimeZone.getTimeZone('UTC'))
 
                 sh """curl http://devlake-config-ui-1:4000/api/rest/plugins/webhook/connections/2/deployments -X 'POST' -H 'Authorization: Bearer eLgjJAH5wN0zlboo26oIfh9zLh3sAQiv5iBTRx2terkvg9U8JFfuuTFDu0m8sK3FVWvBw0yHTqIJofUpWLfVRIQKD2XrBhkHAhGyKseHcCi9lDooDJkQ2k4I9VwLZyU2' -d '{
                     \"id\": \"jenkins:JenkinsBuild:2:deploy#${env.BUILD_NUMBER}\",
-                    \"startedDate\": \"${env.DEPLOY_START_TIME}\",
+                    \"startedDate\": \"${now}\",
                     \"finishedDate\": \"${deployEndTime}\",
                     \"result\": \"FAILURE\",
                     \"deploymentCommits\": [
                         {
                             \"repoUrl\": \"${REPOSITORY}\",
                             \"refName\": \"${env.GIT_BRANCH}\",
-                            // Use the dynamic deployment times for the commit as well
-                            \"startedDate\": \"${env.COMMIT_START_TIME}\",
+                            \"startedDate\": \"${now}\",
                             \"finishedDate\": \"${deployEndTime}\",
                             \"commitSha\": \"${env.GIT_COMMIT}\",
-                            \"commitMsg\": \"deployment made :)\"
+                            \"commitMsg\": \"deployment failure\"
                         }
                     ]
                 }'"""
