@@ -1,5 +1,7 @@
-{
-  "chaos_engineering_employed": true,
-  "smoke_test_in_cert_release": true,
-  "smoke_test_in_prod_release": true
-}
+[
+  {
+    "chaos_engineering_employed": true,
+    "smoke_test_in_cert_release": true,
+    "smoke_test_in_prod_release": true
+  }
+]
