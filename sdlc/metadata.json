@@ -1,6 +1,6 @@
 [
   {
-    "chaos_engineering_employed": true,
+    "chaos_engineering_employed": false,
     "smoke_test_in_cert_release": false,
     "smoke_test_in_prod_release": false
   }
